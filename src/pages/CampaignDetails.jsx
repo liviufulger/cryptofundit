@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { ethers } from "ethers";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { useWeb3 } from "../context/Web3Context";
 import { motion } from "framer-motion";
 import {
@@ -155,7 +155,6 @@ const CampaignDetails = () => {
       variants={containerVariants}
       className="container mx-auto px-4 py-8 max-w-7xl"
     >
-      <Toaster position="top-right" />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column */}
