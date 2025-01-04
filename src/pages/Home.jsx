@@ -20,7 +20,7 @@ const HomePage = () => {
           setIsLoading(true);
 
           // Get total campaigns
-          const campaignCount = await readOnlyContract.numberOfCampaigns();
+          const campaignCount = await readOnlyContract.totalCampaigns();
 
           // Fetch campaign details
           const campaignPromises = Array.from(
