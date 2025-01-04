@@ -52,7 +52,7 @@ const MyCampaigns = () => {
     try {
       setIsLoading(true);
 
-      const totalCampaigns = await contract.numberOfCampaigns();
+      const totalCampaigns = await contract.totalCampaigns();
       const myCampaigns = [];
 
       for (let i = 0; i < totalCampaigns; i++) {

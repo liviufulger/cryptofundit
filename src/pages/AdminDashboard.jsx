@@ -61,7 +61,7 @@ const AdminDashboard = () => {
           return;
         }
 
-        const campaignCount = await readOnlyContract.numberOfCampaigns();
+        const campaignCount = await readOnlyContract.totalCampaigns();
         const campaignPromises = Array.from(
           { length: Number(campaignCount) },
           (_, index) => readOnlyContract.getCampaign(index)

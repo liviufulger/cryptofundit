@@ -218,7 +218,7 @@ const AboutUs = () => {
           </p>
           <div className="flex gap-4">
             <Link
-              to="https://testnet.snowtrace.io/address/0xa8C4d67Bb779d99d97A91c86FA0327A0b1781783"
+              to="https://testnet.snowtrace.io/address/0xdBcc37E59CE496A830Aa9F6719BEA2FF86F435EB"
               className="btn btn-primary gap-2"
               target="_blank"
               rel="noopener noreferrer"

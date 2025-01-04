@@ -1,21 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { ethers } from "ethers";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { useWeb3 } from "../context/Web3Context";
-import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from "chart.js";
 import { format } from "date-fns";
 import {
   Pause,
@@ -25,26 +13,17 @@ import {
   Save,
   Wallet,
   Target,
-  Image as ImageIcon,
+  Clock,
   AlertCircle,
   ArrowUpCircle,
   DollarSign,
-  TrendingUp,
   Users,
   Activity,
+  Calendar,
+  Timer,
+  History,
+  User,
 } from "lucide-react";
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
 
 const ManageCampaign = () => {
   const { id } = useParams();
@@ -125,7 +104,6 @@ const ManageCampaign = () => {
       const history = donors.map((donor, index) => ({
         donor,
         amount: ethers.formatEther(donations[index]),
-        timestamp: Date.now() - index * 86400000, // Simulated timestamps for demo
       }));
 
       setDonationHistory(history);
@@ -145,41 +123,6 @@ const ManageCampaign = () => {
       console.error("Error fetching campaign details:", error);
       toast.error("Failed to fetch campaign details.");
     }
-  };
-
-  // Chart configurations
-  const donationChartData = {
-    labels: donationHistory
-      .map((d) => format(new Date(d.timestamp), "MMM dd"))
-      .reverse(),
-    datasets: [
-      {
-        label: "Donation Amount (AVAX)",
-        data: donationHistory.map((d) => d.amount).reverse(),
-        fill: true,
-        borderColor: "rgb(59, 130, 246)",
-        backgroundColor: "rgba(59, 130, 246, 0.1)",
-        tension: 0.4,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: "Donation History",
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-    },
   };
 
   const handleEditCampaign = async (e) => {
@@ -230,22 +173,23 @@ const ManageCampaign = () => {
     }
   };
 
+  const getTimeRemaining = () => {
+    const deadline = new Date(campaign.deadline);
+    const now = new Date();
+    const diff = deadline - now;
+    
+    if (diff <= 0) return "Ended";
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    
+    return `${days}d ${hours}h remaining`;
+  };
+
   if (!account) {
     return (
       <div className="alert alert-warning">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="stroke-current shrink-0 h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          />
-        </svg>
+        <AlertCircle className="w-6 h-6" />
         <span>Please connect your wallet to see this page.</span>
       </div>
     );
@@ -266,7 +210,7 @@ const ManageCampaign = () => {
       variants={containerVariants}
       className="container mx-auto px-4 py-8 max-w-7xl"
     >
-      <Toaster position="top-right" />
+    
 
       {/* Header */}
       <motion.div variants={itemVariants} className="mb-8">
@@ -276,7 +220,7 @@ const ManageCampaign = () => {
         <p className="text-base-content/70 mt-2">{campaign.title}</p>
       </motion.div>
 
-      {/* Quick Stats - Full Width */}
+      {/* Quick Stats */}
       <motion.div
         variants={itemVariants}
         className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
@@ -309,36 +253,92 @@ const ManageCampaign = () => {
 
         <div className="stat bg-base-100 shadow rounded-box">
           <div className="stat-figure text-success">
-            <TrendingUp className="w-8 h-8" />
+            <Timer className="w-8 h-8" />
           </div>
-          <div className="stat-title">Avg. Donation</div>
-          <div className="stat-value text-success">
-            {donorStats.averageDonation.toFixed(2)} AVAX
+          <div className="stat-title">Time Left</div>
+          <div className="stat-value text-success text-2xl">
+            {getTimeRemaining()}
           </div>
         </div>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column - Chart */}
+        {/* Left Column - Campaign Details & Recent Activity */}
         <motion.div variants={itemVariants} className="lg:col-span-8">
-          {/* Donation History Chart */}
-          <motion.div
-            variants={itemVariants}
-            className="card bg-base-100 shadow-xl"
-          >
+          {/* Campaign Progress */}
+          <div className="card bg-base-100 shadow-xl mb-8">
             <div className="card-body">
               <h2 className="card-title flex items-center gap-2">
                 <Activity className="w-5 h-5" />
-                Donation History
+                Campaign Progress
               </h2>
-              <div className="h-[300px]">
-                <Line data={donationChartData} options={chartOptions} />
+              <div className="mt-4">
+                <div className="flex justify-between mb-2">
+                  <span>Progress</span>
+                  <span>
+                    {((Number(campaign.totalRaised) / Number(campaign.target)) *
+                      100).toFixed(2)}
+                    %
+                  </span>
+                </div>
+                <progress
+                  className="progress progress-primary w-full"
+                  value={campaign.totalRaised}
+                  max={campaign.target}
+                ></progress>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                  <p className="text-sm opacity-70">Current Balance</p>
+                  <p className="text-xl font-bold">
+                    {campaign.currentBalance} AVAX
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm opacity-70">Largest Donation</p>
+                  <p className="text-xl font-bold">
+                    {donorStats.largestDonation.toFixed(2)} AVAX
+                  </p>
+                </div>
               </div>
             </div>
-          </motion.div>
+          </div>
+
+          {/* Recent Donations */}
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h2 className="card-title flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Recent Donations
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="table table-zebra w-full">
+                  <thead>
+                    <tr>
+                      <th>Donor</th>
+                      <th>Amount</th>
+                     
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {donationHistory.slice(0, 5).map((donation, index) => (
+                      <tr key={index}>
+                        <td className="font-mono text-sm">
+                          {donation.donor.slice(0, 6)}...
+                          {donation.donor.slice(-4)}
+                        </td>
+                        <td>{donation.amount} AVAX</td>
+                       
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Right Column - Campaign State */}
+        {/* Right Column - Campaign Controls */}
         <motion.div variants={itemVariants} className="lg:col-span-4 space-y-6">
           {/* Campaign State Management */}
           <div className="card bg-base-100 shadow-xl">
@@ -444,7 +444,7 @@ const ManageCampaign = () => {
         </motion.div>
       </div>
 
-      {/* Edit Campaign Section - Below Chart */}
+      {/* Edit Campaign Section */}
       <motion.div variants={itemVariants} className="mt-8">
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
