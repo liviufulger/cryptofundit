@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
-
+import { Activity, ArrowUpRight, Gift, Pause, Play, Trash2, Upload, Download, RefreshCw } from 'lucide-react';
 
 const START_BLOCK = 37388313;  
 const CHUNK_SIZE = 2000;
-
 
 async function chunkedQueryFilter(contract, filter, startBlock, endBlock) {
   let allEvents = [];
@@ -268,92 +267,102 @@ const CampaignEvents = ({ campaignId }) => {
     };
   }, [readOnlyContract, campaignId]);
 
+  const getEventIcon = (type) => {
+    switch (type) {
+      case 'Created': return <Activity className="w-5 h-5 text-green-500" />;
+      case 'Donation': return <Gift className="w-5 h-5 text-purple-500" />;
+      case 'Withdrawal': return <Download className="w-5 h-5 text-orange-500" />;
+      case 'Paused': return <Pause className="w-5 h-5 text-red-500" />;
+      case 'Resumed': return <Play className="w-5 h-5 text-green-500" />;
+      case 'Completed': return <Upload className="w-5 h-5 text-blue-500" />;
+      case 'Updated': return <RefreshCw className="w-5 h-5 text-yellow-500" />;
+      case 'Deleted': return <Trash2 className="w-5 h-5 text-red-500" />;
+      default: return null;
+    }
+  };
+
+  const formatAddress = (address) => {
+    return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '';
+  };
+
+  const getEventTitle = (type) => {
+    const titles = {
+      'Created': 'Campaign Created',
+      'Donation': 'New Donation',
+      'Withdrawal': 'Funds Withdrawn',
+      'Paused': 'Campaign Paused',
+      'Resumed': 'Campaign Resumed',
+      'Completed': 'Campaign Completed',
+      'Updated': 'Campaign Updated',
+      'Deleted': 'Campaign Deleted'
+    };
+    return titles[type] || type;
+  };
+
+  const renderEventDetails = (event) => {
+    switch (event.type) {
+      case 'Created':
+        return `${event.title} • Owner: ${formatAddress(event.owner)} • Target: ${event.target} AVAX`;
+      case 'Donation':
+        return `${event.amount} AVAX from ${formatAddress(event.donator)}`;
+      case 'Withdrawal':
+        return `${event.amount} AVAX by ${formatAddress(event.owner)}`;
+      case 'Completed':
+        return `Total raised: ${event.totalRaised} AVAX`;
+      case 'Updated':
+        return `${event.title} • Target: ${event.target} AVAX`;
+      case 'Deleted':
+        return `By: ${formatAddress(event.deletedBy)}`;
+      default:
+        return '';
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Latest Transactions</h2>
-      <div className="space-y-2">
-        {campaignEvents.map((event, index) => (
-          <div
-            key={`${event.transactionHash}-${index}`}
-            className="p-4 bg-white rounded-lg shadow"
-          >
-            {/* Render based on event.type */}
-            {event.type === 'Created' && (
-              <p>
-                <span className="font-semibold">Campaign Created</span><br/>
-                <span className="font-medium">Title:</span> {event.title}<br/>
-                <span className="font-medium">Owner:</span> {event.owner?.slice(0,6)}...{event.owner?.slice(-4)}<br/>
-                <span className="font-medium">Target:</span> {event.target} AVAX<br/>
-                <span className="font-medium">Deadline:</span> {event.deadline}
-              </p>
-            )}
-
-            {event.type === 'Donation' && (
-              <p>
-                <span className="font-semibold">Donation:</span> {event.amount} AVAX 
-                from {event.donator?.slice(0, 6)}...{event.donator?.slice(-4)}
-              </p>
-            )}
-
-            {event.type === 'Withdrawal' && (
-              <p>
-                <span className="font-semibold">Withdrawal:</span> {event.amount} AVAX 
-                by {event.owner?.slice(0, 6)}...{event.owner?.slice(-4)}
-              </p>
-            )}
-
-            {event.type === 'Paused' && (
-              <p>
-                <span className="font-semibold">Campaign Paused</span>
-              </p>
-            )}
-
-            {event.type === 'Resumed' && (
-              <p>
-                <span className="font-semibold">Campaign Resumed</span>
-              </p>
-            )}
-
-            {event.type === 'Completed' && (
-              <p>
-                <span className="font-semibold">Campaign Completed</span> 
-                with total raised: {event.totalRaised} AVAX
-              </p>
-            )}
-
-            {event.type === 'Updated' && (
-              <p>
-                <span className="font-semibold">Campaign Updated</span><br/>
-                <span className="font-medium">Title:</span> {event.title}<br/>
-                <span className="font-medium">Description:</span> {event.description}<br/>
-                <span className="font-medium">Target:</span> {event.target} AVAX<br/>
-                <span className="font-medium">Deadline:</span> {event.deadline}
-              </p>
-            )}
-
-            {event.type === 'Deleted' && (
-              <p>
-                <span className="font-semibold">Campaign Deleted</span><br/>
-                <span className="font-medium">Deleted By:</span> {event.deletedBy?.slice(0,6)}...{event.deletedBy?.slice(-4)}
-              </p>
-            )}
-
-            {/* Link to the transaction */}
-            <a
-              href={`https://testnet.snowtrace.io/tx/${event.transactionHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-blue-500 hover:text-blue-700 block mt-2"
+    <div className="w-[70%] mx-auto">
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Latest Transactions
+          </h2>
+        </div>
+        
+        <div className="divide-y divide-gray-100">
+          {campaignEvents.slice(0, 10).map((event, index) => (
+            <div
+              key={`${event.transactionHash}-${index}`}
+              className="px-4 py-2.5 hover:bg-gray-50 transition-colors duration-150"
             >
-              View transaction
-            </a>
-          </div>
-        ))}
+              <div className="flex items-center gap-3">
+                <div>{getEventIcon(event.type)}</div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm">
+                    <span className="font-medium text-gray-900">{getEventTitle(event.type)}</span>
+                    <span className="text-gray-500 ">    {renderEventDetails(event)}</span>
+                  </div>
+                </div>
+
+                <a
+                  href={`https://testnet.snowtrace.io/tx/${event.transactionHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 shrink-0"
+                >
+                  View
+                  <ArrowUpRight className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
 export default CampaignEvents;
+
+
 
