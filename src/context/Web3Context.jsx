@@ -12,6 +12,7 @@ export const Web3Provider = ({ children }) => {
   const [signer, setSigner] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [balance, setBalance] = useState(null);
+  const [gasPrice, setGasPrice] = useState(null);
   const [walletError, setWalletError] = useState(null);
   const [sdk, setSDK] = useState(null);
   const [connectionMethod, setConnectionMethod] = useState(null);
@@ -26,6 +27,27 @@ export const Web3Provider = ({ children }) => {
       provider
     );
     setReadOnlyContract(readOnlyContractInstance);
+
+
+     // Start gas price monitoring
+     const fetchGasPrice = async () => {
+      try {
+        const feeData = await provider.getFeeData();
+        // Convert from Wei to Gwei for readability
+        const gasPriceInGwei = ethers.formatUnits(feeData.gasPrice, 'gwei');
+        setGasPrice(gasPriceInGwei);
+      } catch (error) {
+        console.error('Failed to fetch gas price:', error);
+      }
+    };
+
+    // Fetch initial gas price
+    fetchGasPrice();
+
+       // Set up interval to update gas price every 30 seconds
+       const gasPriceInterval = setInterval(fetchGasPrice, 30000);
+
+
 
     // Initialize MetaMask SDK
     const metamaskSDK = new MetaMaskSDK({
@@ -76,6 +98,9 @@ export const Web3Provider = ({ children }) => {
   const handleConnection = async (userAddress, provider, currentSigner, method) => {
     try {
       const balance = await provider.getBalance(userAddress);
+      const feeData = await provider.getFeeData();
+      const gasPriceInGwei = ethers.formatUnits(feeData.gasPrice, 'gwei');
+
 
       // Save connection details
       localStorage.setItem('walletAccount', userAddress);
@@ -87,6 +112,7 @@ export const Web3Provider = ({ children }) => {
       setSigner(currentSigner || null);
       setIsConnected(true);
       setBalance(ethers.formatEther(balance));
+      setGasPrice(gasPriceInGwei);
       setConnectionMethod(method || null);
 
       // Setup contract
@@ -194,6 +220,7 @@ export const Web3Provider = ({ children }) => {
     setContract(null);
     setIsConnected(false);
     setBalance(null);
+    setGasPrice(null);
     setWalletError(null);
     setConnectionMethod(null);
   };
@@ -269,6 +296,7 @@ export const Web3Provider = ({ children }) => {
         signer,
         isConnected,
         balance,
+        gasPrice,
         connectWallet,
         disconnectWallet,
         connectWalletMetamask,

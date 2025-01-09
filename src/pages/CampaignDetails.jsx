@@ -15,7 +15,7 @@ import {
 
 const CampaignDetails = () => {
   const { id } = useParams();
-  const { readOnlyContract, contract, account, connectWallet } = useWeb3();
+  const { readOnlyContract, contract, account, connectWallet, gasPrice } = useWeb3();
   const [campaign, setCampaign] = useState(null);
   const [donorsList, setDonorsList] = useState([]);
   const [donationAmount, setDonationAmount] = useState("");
@@ -101,6 +101,12 @@ const CampaignDetails = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const convertGweiToAvax = (gweiPrice) => {
+    if (!gweiPrice) return null;
+    const avaxPrice = parseFloat(gweiPrice) * 0.000000001;
+    return avaxPrice.toFixed(9);
   };
 
   const handleDonate = async (e) => {
@@ -238,6 +244,22 @@ const CampaignDetails = () => {
                     </div>
                   </div>
                 </div>
+
+
+                <div className="stats shadow w-full">
+      <div className="stat">
+        <div className="stat-figure text-info">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 stroke-current">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div className="stat-title">Estimated Gas Fee</div>
+        <div className="stat-value text-info text-2xl">
+          {convertGweiToAvax(gasPrice)} AVAX
+        </div>
+        <div className="stat-desc">Updated in real-time</div>
+      </div>
+    </div>
 
                 <form onSubmit={handleDonate} className="space-y-4">
                   <div className="form-control">
