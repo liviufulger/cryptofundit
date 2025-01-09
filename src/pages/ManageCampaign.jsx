@@ -4,7 +4,6 @@ import { ethers } from "ethers";
 import { toast } from "react-hot-toast";
 import { motion } from "framer-motion";
 import { useWeb3 } from "../context/Web3Context";
-import { format } from "date-fns";
 import {
   Pause,
   Play,
