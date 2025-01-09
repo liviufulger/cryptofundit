@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useWeb3 } from "../context/Web3Context";
-import CampaignCard from "../components/CampaignCard"; // Adjust the path if necessary
+import CampaignCard from "../components/CampaignCard";
+import CampaignEvents from "../components/CampaignEvents";
 import { motion } from "framer-motion";
 
-const HomePage = () => {
+const HomePage = ({campaignId}) => {
   const { readOnlyContract, account, connectWallet } = useWeb3();
   const [campaigns, setCampaigns] = useState([]);
   const [filteredCampaigns, setFilteredCampaigns] = useState([]);
@@ -147,7 +148,15 @@ const HomePage = () => {
           </button>
         </div>
       )}
+
+<div className="flex justify-center mt-6">
+  
+      
+      {/* Add the events component */}
+      <CampaignEvents campaignId={campaignId} />
     </div>
+    </div>
+    
   );
 };
 

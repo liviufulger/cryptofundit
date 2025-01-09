@@ -20,13 +20,18 @@ export const Web3Provider = ({ children }) => {
   // Initialize providers and SDK
   useEffect(() => {
     // Initialize read-only provider for Avalanche Testnet
-    const provider = new ethers.JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc');
+    // const provider = new ethers.JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc');
+    const provider = new ethers.WebSocketProvider("wss://api.avax-test.network/ext/bc/C/ws");
+
     const readOnlyContractInstance = new ethers.Contract(
       contractAddress,
       contractABI,
       provider
     );
     setReadOnlyContract(readOnlyContractInstance);
+
+    console.log('Read-only provider is:', provider);
+console.log('Read-only contract instance is:', readOnlyContractInstance);
 
 
      // Start gas price monitoring
